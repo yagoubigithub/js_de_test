@@ -1,4 +1,4 @@
-var data = [
+const data = [
   {
     Cheese: 22.2,
     CHOCOLATE: 10.3,
@@ -19,8 +19,6 @@ var data = [
   },
 ];
 
-// array of period
-var labels = data.map(item=>item.period)
 // bg and border color to push theme later
 const colors = {
   backgroundColor: [
@@ -37,64 +35,47 @@ const colors = {
   ],
 };
 
-// calculate the last item of 
-function calculTotal(data){
-return {
-    label: "total",
+//get keys of one object in data array
+const getKeys = (item) => Object.keys(item).filter((key) => key !== "period");
 
+//calcul total of one item in data array
+const calculItemsTotal = (data) =>data.map((item) => sommeArray(getAllValuesOfItem(item)) / 3);
+
+//get the values of one item in array 
+const getAllValuesOfItem = (item) => getKeys(item).map((key) => item[key]);
+
+//calcul the some of one array of numbers
+const sommeArray = (array) =>array.reduce((sum, current) => sum + (current === undefined ? 0 : current),0);
+  
+//get all data with the same key
+const getAllDataWithSameKey  = (data,key) =>data.map((item) => item[key])
+
+const calculTotal = (data) => ({
+  label: "total",
+  ...colors,
+  data: calculItemsTotal(data),
+});
+
+//calcul graph data (datasets)
+const calculGraphData = (data) =>
+  getKeys(data[0]).map((key) => ({
+    label: key,
+    data: getAllDataWithSameKey(data, key),
     ...colors,
-   // calculate the some of every item in data Array;
-    data: data.map((item) => {
-
-        // get all values of item
-      const values = Object.keys(item)
-        .map((key) => {
-          if (key !== "period") return item[key];
-        })
-        
-      
-        //calculate the some of this values
-
-      return  values.reduce((sum, current) => {
-        if (current === undefined)  
-        current = 0;
-         return sum + current;
-      }, 0) / 3;
-    }),
-  };
-}
-
+  }));
 
 function generateGraph(data) {
-  var graphValues = [];
-  
-  Object.keys(data[0]).map((key) => {
-    if (key !== "period") {
-      var temp = {
-        label: key,
-        //get all data with the same key
-        data: data.map((item) => {
-          return item[key];
-        }),
-        //bg and border colors
-        ...colors,
-      };
-
-      graphValues.push(temp);
-    }
-  });
-
+  const graphValues = calculGraphData(data);
 
   graphValues.push(calculTotal(data));
-
  
-  var ctx = document.getElementById('myChart').getContext('2d');
-  var myChart = new Chart(ctx, {
-    type: 'line',
+  const ctx = document.getElementById("myChart").getContext("2d");
+  const myChart = new Chart(ctx, {
+    type: "line",
     data: {
-      labels: labels,
-      datasets: graphValues
-    }
+      labels:  data.map((item) => item.period),
+      datasets: graphValues,
+    },
   });
 }
 
